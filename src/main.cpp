@@ -34,7 +34,6 @@ void handleGetTime(AsyncWebServerRequest *request)
 
 bool relayActivated = false;
 
-
 void ActivateElectrovalve()
 {
   digitalWrite(RELAY_GPIO, HIGH);

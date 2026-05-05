@@ -6,7 +6,7 @@
 #include "./headers/json.h"
 #include "LittleFS.h"
 
-#define TASK_DURATION 3000 
+#define TASK_DURATION 60*1000 
 
 namespace TaskManager {
     extern unsigned long getDateCheckMillis;

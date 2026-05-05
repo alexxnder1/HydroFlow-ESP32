@@ -6,7 +6,7 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 
-#define DEBUG
+// #define DEBUG
 
 const char* ssid = "HydroFlow";
 const char* password = "test";
@@ -17,6 +17,7 @@ AsyncWebServer server(80);
 #include "./headers/electrovalve.h"
 #include "./headers/timestamp.h"
 #include "./headers/json.h"
+
 
 void setup() {
   
@@ -76,4 +77,5 @@ void setup() {
 
 void loop() {  
   TaskManager::CheckForTasks();
+  delay(10);
 }

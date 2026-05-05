@@ -5,14 +5,16 @@ namespace TaskManager {
     int lastMinuteEnabled = -1;
     // TODO: load din Flash la tasks
     std::vector<Task> tasks = {
-        {6, 36},
-        {6, 39},
-        {20, 30}
+        {4, 15},
+        {9, 0},
+        {21, 30}
     };
 
     void handleForceTask(AsyncWebServerRequest *request)
     {
         Electrovalve::ActivateElectrovalve();
+        Serial.println("Handle force task");
+
         request->send(200, "text/plain", "OK");
     }
 
@@ -31,26 +33,33 @@ namespace TaskManager {
 
     tm* GetDate()
     {
-        if(TimestampManager::timestamp == "")
-        { 
-            Serial.println("Timestamp not set.");
-            return nullptr;
-        }
+        time_t t;
+        struct tm *info;
 
-        time_t ts = atol(TimestampManager::timestamp.c_str()) / 1000;
+        time(&t);
+        return localtime(&t);
 
-        static struct tm timeinfo;
-        localtime_r(&ts, &timeinfo);
-        return &timeinfo;
+        
+        // if(TimestampManager::startTimestamp == "")
+        // { 
+        //     Serial.  ("Timestamp not set.");
+        //     return nullptr;
+        // }
+
+        // time_t ts = atol(TimestampManager::startTimestamp.c_str()) / 1000;
+
+        // static struct tm timeinfo;
+        // localtime_r(&ts, &timeinfo);
+        // return &timeinfo;
     }
 
     void CheckForTasks() {
         if (millis() - getDateCheckMillis > 1500) {
             getDateCheckMillis = millis();
             
-            Serial.println(TimestampManager::timestamp.c_str());
+            Serial.println(TimestampManager::startTimestamp.c_str());
             Serial.println(TaskManager::tasks.size());
-            if(TimestampManager::timestamp == "") 
+            if(TimestampManager::startTimestamp == "") 
             {
                 Serial.println("[TaskManager] Waiting for Client to retrieve timestamp...");
                 return; 

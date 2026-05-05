@@ -5,7 +5,7 @@
 extern AsyncWebServer server;
 
 namespace TimestampManager {
-    extern std::string timestamp;
+    extern std::string startTimestamp;
     void handleGetTime(AsyncWebServerRequest *request);
     void SetRoutes();
 }

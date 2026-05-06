@@ -6,8 +6,6 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 
-// #define DEBUG
-
 const char* ssid = "HydroFlow";
 const char* password = "test";
 
@@ -17,10 +15,11 @@ AsyncWebServer server(80);
 #include "./headers/electrovalve.h"
 #include "./headers/timestamp.h"
 #include "./headers/json.h"
+#include "./headers/uptime.h"
 
+// #define STA_MODE
 
 void setup() {
-  
   Serial.begin(115200);
   Serial.println("test");
   
@@ -32,7 +31,7 @@ void setup() {
 
   TaskManager::WriteTasksToFlash();  
 
-  #ifdef DEBUG
+  #ifdef STA_MODE
     WiFi.mode(WIFI_STA);
     WiFi.disconnect(true);
     WiFi.begin("0x9988b7", "ghitaeprost");
@@ -68,6 +67,7 @@ void setup() {
   // Routes
   TimestampManager::SetRoutes();
   TaskManager::SetRoutes();
+  UptimeManager::SetRoutes();
 
   server.serveStatic("/", LittleFS, "/")
     .setDefaultFile("index.html");
@@ -78,4 +78,4 @@ void setup() {
 void loop() {  
   TaskManager::CheckForTasks();
   delay(10);
-}
+} 

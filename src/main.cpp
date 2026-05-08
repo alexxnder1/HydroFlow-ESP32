@@ -17,7 +17,7 @@ AsyncWebServer server(80);
 #include "./headers/json.h"
 #include "./headers/uptime.h"
 
-// #define STA_MODE
+#define STA_MODE
 
 void setup() {
   Serial.begin(115200);
@@ -29,8 +29,6 @@ void setup() {
   }
   Serial.println("LittleFS mounted!");
 
-  TaskManager::WriteTasksToFlash();  
-
   #ifdef STA_MODE
     WiFi.mode(WIFI_STA);
     WiFi.disconnect(true);
@@ -39,8 +37,8 @@ void setup() {
 
     Serial.printf("\nConnecting to Hotspot");
     while(WiFi.status() != WL_CONNECTED)
-    {
-      delay(500);
+    { 
+      delay(50);
       Serial.print("."); 
     }
 

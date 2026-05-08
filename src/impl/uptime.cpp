@@ -11,8 +11,11 @@ namespace UptimeManager {
     void handleUptime(AsyncWebServerRequest* request)
     {
         char json[64];
-        unsigned long currentUptime = GetUptime() / 1000;
+     
+        unsigned long currentUptime = millis();
+
         snprintf(json, sizeof(json), "{\"uptime\":\"%lu\"}", currentUptime);
+        
         request->send(200, "application/json", json);
     }
 

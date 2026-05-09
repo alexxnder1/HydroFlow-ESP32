@@ -14,12 +14,48 @@ namespace TaskManager {
         request->send(200, "text/plain", "OK");
     }
 
+    void LoadTasksFromMemory()
+    {
+        JsonDocument doc = GetJsonDocument("tasks");
+        JsonArray array = doc.as<JsonArray>();
+
+        tasks.clear();
+
+        if(!array.isNull())
+        {
+            for(JsonVariant t : array)
+            {
+                JsonObject task = t.as<JsonObject>();
+
+                if(!task.isNull())
+                    tasks.push_back({task["hour"], task["minute"]});
+            }
+        }
+       
+        Serial.printf("\n[LoadTasksFromMemory] Loaded %d tasks.\n", tasks.size());
+    }
+
     void handleTasks(AsyncWebServerRequest* request)
     {
-        if(LittleFS.exists("/tasks.json"))
-            request->send(LittleFS, "/tasks.json", "application/json");
+        JsonDocument doc;
+        JsonArray array = doc.to<JsonArray>();
 
-        else request->send(400, "application/json", "{\"error\":\"File not found\"}");
+        for(int i = 0; i < tasks.size(); i++)
+        {
+            JsonObject obj = array.add<JsonObject>();
+            Task task = tasks[i];
+            obj["hour"] = task.hour;
+            obj["minute"] = task.minute;   
+            Serial.printf("\nTest %d",i);
+        }
+
+        String output;
+        serializeJson(doc, output);
+        request->send(200, "application/json", output);
+        // if(LittleFS.exists("/tasks.json"))
+        //     request->send(LittleFS, "/tasks.json", "application/json"); 
+
+        // else request->send(400, "application/json", "{\"error\":\"File not found\"}");
     }
     
     void handleAddTask(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) 
@@ -43,7 +79,7 @@ namespace TaskManager {
                     Serial.printf("\n Error parsing task data.");
 
                 tasks.push_back({h, m});
-                WriteTasksToFlash();
+                SaveTasksToFlash();
                 Serial.printf("\n[Add Task] Hour: %d, Minute: %d.", h, m);
             }
             requestBody = "";
@@ -57,17 +93,24 @@ namespace TaskManager {
             int minute = request->getParam("minute")->value().toInt();
 
             bool found=false;
+            Serial.printf("\n[TASKS--------- %d, %d\n", hour, minute);
+
             for(int i = 0; i < tasks.size(); i++)
             {
                 if(tasks[i].hour == hour && tasks[i].minute == minute)
                 {
+                    Serial.printf("\n Hour: %d, Minute: %d", tasks[i].hour, tasks[i].minute);
+
                     tasks.erase(tasks.begin() + i);
-                    WriteTasksToFlash();
+                    SaveTasksToFlash();
+
                     Serial.printf("\n[Remove Task] Hour: %d, Minute: %d", hour, minute);
                     found=true;
                     break;
                 }
             }
+            Serial.printf("\n-------------\n");
+
             if(!found)
                 Serial.printf("[Delete Task] Cannot find Task: %d, %d", hour, minute);
         }
@@ -86,21 +129,18 @@ namespace TaskManager {
         server.on("/delete_task", HTTP_GET, handleDeleteTask);
     }
 
-    tm* GetDate()
+    tm GetDate()
     {
         time_t t;
-        struct tm *info;
-
         time(&t);
-        return localtime(&t);       
+        struct tm timeinfo;
+        localtime_r(&t, &timeinfo);
+        return timeinfo;       
     }
 
     void CheckForTasks() {
         if (millis() - getDateCheckMillis > 1500) {
             getDateCheckMillis = millis();
-            
-            Serial.println(TimestampManager::startTimestamp.c_str());
-            Serial.println(TaskManager::tasks.size());
             if(TimestampManager::startTimestamp == "") 
             {
                 Serial.println("[TaskManager] Waiting for Client to retrieve timestamp...");
@@ -112,17 +152,17 @@ namespace TaskManager {
                 return; 
             }
 
-            tm* date = GetDate();
-            if(!date) return;
-            // Serial.printf("\nGetDate returned: %d.%d.%d, %d:%d\n", date->tm_year, date->tm_mon, date->tm_mday, date->tm_hour, date->tm_min);
+            tm date = GetDate();
 
-            if(!Electrovalve::enable && lastMinuteEnabled != date->tm_min) {
+            if(!Electrovalve::enable && lastMinuteEnabled != date.tm_min) {
+
                 for(TaskManager::Task &task : TaskManager::tasks) 
                 {
-                    if(task.hour == date->tm_hour && task.minute == date->tm_min)
+                    Serial.printf("\nTask returned: %d-%d, %d-%d\n", task.hour, date.tm_hour, task.minute, date.tm_min);
+                    if(task.hour == date.tm_hour && task.minute == date.tm_min)
                     {
                         Electrovalve::ActivateElectrovalve();
-                        lastMinuteEnabled = date->tm_min;
+                        lastMinuteEnabled = date.tm_min;
                         break;
                     }
                 }
@@ -134,7 +174,7 @@ namespace TaskManager {
         }
     }
 
-    void WriteTasksToFlash() {
+    void SaveTasksToFlash() {
         WriteJsonDoc<Task>(
             "tasks",
             tasks,

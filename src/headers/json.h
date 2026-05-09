@@ -13,7 +13,7 @@ void WriteJsonDoc(const char* fileName, const std::vector<T>& data, F toJson) {
     JsonArray arr = doc.to<JsonArray>();
     
     for (const T& item : data) {
-        JsonObject obj = arr.add<JsonObject>(); // Versiune mai nouă de ArduinoJson
+        JsonObject obj = arr.add<JsonObject>(); 
         toJson(item, obj);
     }
 

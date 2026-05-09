@@ -21,7 +21,6 @@ AsyncWebServer server(80);
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("test");
   
   if (!LittleFS.begin(true)) {
     Serial.println("LittleFS mount failed!");
@@ -58,6 +57,8 @@ void setup() {
     }
 
   #endif
+
+  TaskManager::LoadTasksFromMemory();
 
   Electrovalve::SetGPIOToOutput();
   Electrovalve::DisableElectrovalve();

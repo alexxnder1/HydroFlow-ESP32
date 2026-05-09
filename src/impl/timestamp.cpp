@@ -21,7 +21,9 @@ namespace TimestampManager {
             tv.tv_usec = 0;
 
             settimeofday(&tv, NULL);    
-
+            setenv("TZ", "EET-2EEST,M3.5.0/3,M10.5.0/4", 1);
+            tzset();
+            
             Serial.println("[TimestampManager] Updated local machine time from ClientSide!");
         }
         request->send(200, "text/plain", "OK");

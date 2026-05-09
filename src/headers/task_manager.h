@@ -27,7 +27,8 @@ namespace TaskManager {
     // Default Tasks
     extern std::vector<Task> tasks;
 
-    tm* GetDate();
+    tm GetDate();
     void CheckForTasks();
-    void WriteTasksToFlash();
+    void LoadTasksFromMemory();
+    void SaveTasksToFlash();
 }

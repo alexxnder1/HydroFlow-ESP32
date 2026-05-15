@@ -85,6 +85,33 @@ namespace TaskManager {
             requestBody = "";
         }
     }
+    void handleStopTask(AsyncWebServerRequest* request)
+    {
+        if(request->hasParam("hour") && request->hasParam("minute"))
+        {
+            int hour = request->getParam("hour")->value().toInt();
+            int minute = request->getParam("minute")->value().toInt();
+
+            bool found=false;
+
+            for(int i = 0; i < tasks.size(); i++)
+            {
+                if(tasks[i].hour == hour && tasks[i].minute == minute)
+                {
+                    Electrovalve::DisableElectrovalve();
+                    Serial.printf("\n[Stop Task] Hour: %d, Minute: %d", hour, minute);
+                    found=true;
+                    break;
+                }
+            }
+
+            if(!found)
+                Serial.printf("[Stop Task] Cannot find Task: %d, %d", hour, minute);
+        }
+
+        request->send(200, "text/plain", "OK");
+    }
+
     void handleDeleteTask(AsyncWebServerRequest* request)
     {
         if(request->hasParam("hour") && request->hasParam("minute"))
@@ -93,14 +120,11 @@ namespace TaskManager {
             int minute = request->getParam("minute")->value().toInt();
 
             bool found=false;
-            Serial.printf("\n[TASKS--------- %d, %d\n", hour, minute);
 
             for(int i = 0; i < tasks.size(); i++)
             {
                 if(tasks[i].hour == hour && tasks[i].minute == minute)
                 {
-                    Serial.printf("\n Hour: %d, Minute: %d", tasks[i].hour, tasks[i].minute);
-
                     tasks.erase(tasks.begin() + i);
                     SaveTasksToFlash();
 
@@ -109,7 +133,6 @@ namespace TaskManager {
                     break;
                 }
             }
-            Serial.printf("\n-------------\n");
 
             if(!found)
                 Serial.printf("[Delete Task] Cannot find Task: %d, %d", hour, minute);
@@ -127,6 +150,7 @@ namespace TaskManager {
         }, NULL, handleAddTask);
 
         server.on("/delete_task", HTTP_GET, handleDeleteTask);
+        server.on("/stop_task", HTTP_GET, handleStopTask);
     }
 
     tm GetDate()
@@ -158,7 +182,7 @@ namespace TaskManager {
 
                 for(TaskManager::Task &task : TaskManager::tasks) 
                 {
-                    Serial.printf("\nTask returned: %d-%d, %d-%d\n", task.hour, date.tm_hour, task.minute, date.tm_min);
+                    // Serial.printf("\nTask returned: %d-%d, %d-%d\n", task.hour, date.tm_hour, task.minute, date.tm_min);
                     if(task.hour == date.tm_hour && task.minute == date.tm_min)
                     {
                         Electrovalve::ActivateElectrovalve();

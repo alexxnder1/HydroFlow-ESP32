@@ -167,8 +167,20 @@ namespace TaskManager {
         server.on("/get_task_duration", HTTP_GET, handleGetTaskDuration);
         server.on("/set_task_duration", HTTP_GET, handleSetTaskDuration);
 
-        server.on("/add_task", HTTP_POST, [](AsyncWebServerRequest* request) {
-            request->send(200, "application/json", "{\"status\":\"ok\"}");
+        server.on("/add_task", HTTP_POST | HTTP_OPTIONS, [](AsyncWebServerRequest* request) {
+            if (request->method() == HTTP_OPTIONS) {
+                AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", "");
+                response->addHeader("Access-Control-Allow-Origin", "*");
+                response->addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+                response->addHeader("Access-Control-Allow-Headers", "Content-Type");
+                request->send(response);
+                return;
+            }
+
+            AsyncWebServerResponse *response = request->beginResponse(200, "application/json", "{\"status\":\"success\"}");
+            response->addHeader("Access-Control-Allow-Origin", "*");
+            request->send(response);
+            
         }, NULL, handleAddTask);
 
         server.on("/delete_task", HTTP_GET, handleDeleteTask);

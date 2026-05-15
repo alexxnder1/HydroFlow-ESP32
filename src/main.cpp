@@ -17,16 +17,16 @@ AsyncWebServer server(80);
 #include "./headers/json.h"
 #include "./headers/uptime.h"
 
-// #define STA_MODE
+#define STA_MODE
 
 void setup() {
   Serial.begin(115200);
-  
-  if (!LittleFS.begin(true)) {
-    Serial.println("LittleFS mount failed!");
-    return;
-  }
-  Serial.println("LittleFS mounted!");
+  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
+  // if (!LittleFS.begin(true)) {
+  //   Serial.println("LittleFS mount failed!");
+  //   return;
+  // }
+  // Serial.println("LittleFS mounted!");
 
   #ifdef STA_MODE
     WiFi.mode(WIFI_STA);
@@ -69,8 +69,8 @@ void setup() {
   TaskManager::SetRoutes();
   UptimeManager::SetRoutes();
 
-  server.serveStatic("/", LittleFS, "/")
-    .setDefaultFile("index.html");
+  // server.serveStatic("/", LittleFS, "/")
+  //   .setDefaultFile("index.html");
   
   server.begin();
 }

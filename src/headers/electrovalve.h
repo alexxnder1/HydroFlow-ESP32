@@ -1,5 +1,8 @@
 #pragma once
 #include <Arduino.h>
+#include <ESPAsyncWebServer.h>
+
+extern AsyncWebServer server;
 
 // PINS
 #define RELAY_GPIO   25

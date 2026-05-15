@@ -1,6 +1,7 @@
 #include "./headers/task_manager.h"
 
 namespace TaskManager {   
+    unsigned int TASK_DURATION = 15;
     unsigned long getDateCheckMillis = 0;
     int lastMinuteEnabled = -1;
     // TODO: load din Flash la tasks
@@ -111,6 +112,25 @@ namespace TaskManager {
 
         request->send(200, "text/plain", "OK");
     }
+    
+    void handleGetTaskDuration(AsyncWebServerRequest* request)
+    {
+        Serial.printf("\n[Get Task Duration] Sent task duration %d.", TASK_DURATION);
+        request->send(200, "text/plain", std::to_string(TASK_DURATION).c_str());
+    }
+    
+    void handleSetTaskDuration(AsyncWebServerRequest* request)
+    {
+        if( request->hasParam("d"))
+        {
+            int d = request->getParam("d")->value().toInt();
+            TASK_DURATION = d;
+            Serial.printf("\nRihanna: %d", TASK_DURATION);
+        }
+
+        Serial.printf("\n[Set Task Duration from Client] Sent task duration %d.", TASK_DURATION);
+        request->send(200, "text/plain", "OK");
+    }
 
     void handleDeleteTask(AsyncWebServerRequest* request)
     {
@@ -144,7 +164,9 @@ namespace TaskManager {
     void SetRoutes() {
         server.on("/force_task", HTTP_GET, handleForceTask);
         server.on("/get_tasks", HTTP_GET, handleTasks);
-        
+        server.on("/get_task_duration", HTTP_GET, handleGetTaskDuration);
+        server.on("/set_task_duration", HTTP_GET, handleSetTaskDuration);
+
         server.on("/add_task", HTTP_POST, [](AsyncWebServerRequest* request) {
             request->send(200, "application/json", "{\"status\":\"ok\"}");
         }, NULL, handleAddTask);
@@ -193,7 +215,7 @@ namespace TaskManager {
             }
         }
 
-        if(Electrovalve::enable && millis() - Electrovalve::millisSinceStart > TASK_DURATION) {
+        if(Electrovalve::enable && millis() - Electrovalve::millisSinceStart > TASK_DURATION*60*1000) {
             Electrovalve::DisableElectrovalve();
         }
     }

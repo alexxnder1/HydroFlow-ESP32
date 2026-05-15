@@ -7,7 +7,7 @@
 #include "LittleFS.h"
 
 // #define TASK_DURATION 15*60*1000 
-#define TASK_DURATION 2000
+// #define TASK_DURATION 10*1000
 
 namespace TaskManager {
     extern unsigned long getDateCheckMillis;
@@ -21,7 +21,8 @@ namespace TaskManager {
     };
     
     void handleForceTask(AsyncWebServerRequest *request);
-
+    void handleDeleteTask(AsyncWebServerRequest* request);
+    void handleGetTaskDuration(AsyncWebServerRequest* request);
     void handleTasks(AsyncWebServerRequest* request);
     void SetRoutes();
 

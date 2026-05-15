@@ -17,7 +17,7 @@ AsyncWebServer server(80);
 #include "./headers/json.h"
 #include "./headers/uptime.h"
 
-#define STA_MODE
+// #define STA_MODE
 
 void setup() {
   Serial.begin(115200);
@@ -32,7 +32,8 @@ void setup() {
     WiFi.mode(WIFI_STA);
     WiFi.disconnect(true);
     WiFi.begin("0x9988b7", "ghitaeprost");
-    printf("Connecting to WiFi....");
+    Serial.printf("Connecting to WiFi....");
+    Serial.println(WiFi.getTxPower()); // Returns value in 0.25dBm units
 
     Serial.printf("\nConnecting to Hotspot");
     while(WiFi.status() != WL_CONNECTED)
@@ -47,7 +48,7 @@ void setup() {
   
     WiFi.mode(WIFI_AP); 
     bool ok = WiFi.softAP("HydroFlow", "test1234");
-    
+    Serial.println(WiFi.getTxPower());
     if (ok) {
       Serial.println("Access Point pornit!");
       Serial.print("IP: ");

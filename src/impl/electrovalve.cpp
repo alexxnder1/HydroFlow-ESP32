@@ -1,4 +1,5 @@
 #include "../headers/electrovalve.h"
+#include "../headers/notification.h"
 
 // PINS
 #define RELAY_GPIO   25
@@ -16,6 +17,7 @@ namespace Electrovalve {
         digitalWrite(RELAY_GPIO, HIGH);
         enable = true;
         millisSinceStart = millis();
+        NotificationManager::SendToWS("HydroFlow", "Test!");
     }
 
     void DisableElectrovalve()

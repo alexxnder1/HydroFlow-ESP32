@@ -10,12 +10,14 @@ const char* ssid = "HydroFlow";
 const char* password = "test";
 
 AsyncWebServer server(80);
+AsyncWebSocket ws("/ws");
 
 #include "./headers/task_manager.h"
 #include "./headers/electrovalve.h"
 #include "./headers/timestamp.h"
 #include "./headers/json.h"
 #include "./headers/uptime.h"
+#include "./headers/web_socket.h"
 
 #define STA_MODE
 
@@ -71,8 +73,9 @@ void setup() {
 
   // server.serveStatic("/", LittleFS, "/")
   //   .setDefaultFile("index.html");
-  
   server.begin();
+
+  WebSocket::Setup();
 }
 
 void loop() {  

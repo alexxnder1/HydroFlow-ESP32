@@ -161,6 +161,7 @@ namespace TaskManager {
         request->send(200, "text/plain", "OK");
     }
 
+
     void SetRoutes() {
         server.on("/force_task", HTTP_GET, handleForceTask);
         server.on("/get_tasks", HTTP_GET, handleTasks);

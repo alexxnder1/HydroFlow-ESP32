@@ -12,6 +12,7 @@
 namespace TaskManager {
     extern unsigned long getDateCheckMillis;
     extern int lastMinuteEnabled;
+    extern AsyncWebSocket ws;
 
     class Task {
         public: 

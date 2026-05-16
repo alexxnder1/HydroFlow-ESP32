@@ -19,6 +19,9 @@ AsyncWebSocket ws("/ws");
 #include "./headers/uptime.h"
 #include "./headers/web_socket.h"
 
+// this module is not published on github 
+#include "./privacy.h"
+
 #define STA_MODE
 
 void setup() {
@@ -33,9 +36,10 @@ void setup() {
   #ifdef STA_MODE
     WiFi.mode(WIFI_STA);
     WiFi.disconnect(true);
-    WiFi.begin("0x9988b7", "ghitaeprost");
+    WiFi.setAutoReconnect(true);
+    WiFi.begin(NETWORK_HOST, NETWORK_PASSWORD);
     Serial.printf("Connecting to WiFi....");
-    Serial.println(WiFi.getTxPower()); // Returns value in 0.25dBm units
+    Serial.println(WiFi.getTxPower()); 
 
     Serial.printf("\nConnecting to Hotspot");
     while(WiFi.status() != WL_CONNECTED)

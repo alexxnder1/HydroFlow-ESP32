@@ -205,7 +205,7 @@ namespace TaskManager {
             getDateCheckMillis = millis();
             if(TimestampManager::startTimestamp == "") 
             {
-                Serial.println("[TaskManager] Waiting for Client to retrieve timestamp...");
+                Serial.println("[TaskManager] Timestamp not set.");
                 return; 
             }
             if(TaskManager::tasks.size() == 0) 

@@ -10,7 +10,7 @@ namespace UptimeManager {
 
     void handleUptime(AsyncWebServerRequest* request)
     {
-        char json[64];
+        char json[128];
      
         unsigned long currentUptime = millis();
 

@@ -17,7 +17,6 @@ namespace Electrovalve {
         digitalWrite(RELAY_GPIO, HIGH);
         enable = true;
         millisSinceStart = millis();
-        NotificationManager::SendToWS("HydroFlow", "Test!");
     }
 
     void DisableElectrovalve()

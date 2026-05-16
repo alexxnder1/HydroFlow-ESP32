@@ -11,6 +11,7 @@ namespace TaskManager {
     {
         Electrovalve::ActivateElectrovalve();
         Serial.println("Handle force task");
+        NotificationManager::SendToWS("HydroFlow Tasks", "Task pornit fortat!");
 
         request->send(200, "text/plain", "OK");
     }
@@ -82,6 +83,7 @@ namespace TaskManager {
                 tasks.push_back({h, m});
                 SaveTasksToFlash();
                 Serial.printf("\n[Add Task] Hour: %d, Minute: %d.", h, m);
+                NotificationManager::SendToWS("HydroFlow Tasks", basic_format("A fost adaugat un task la ora {}, minutul {}.", h, m));
             }
             requestBody = "";
         }
@@ -125,7 +127,7 @@ namespace TaskManager {
         {
             int d = request->getParam("d")->value().toInt();
             TASK_DURATION = d;
-            Serial.printf("\nRihanna: %d", TASK_DURATION);
+            NotificationManager::SendToWS("HydroFlow Tasks", basic_format("Durata task-ului a fost setat la {} minute.", d));
         }
 
         Serial.printf("\n[Set Task Duration from Client] Sent task duration %d.", TASK_DURATION);
@@ -149,6 +151,7 @@ namespace TaskManager {
                     SaveTasksToFlash();
 
                     Serial.printf("\n[Remove Task] Hour: %d, Minute: %d", hour, minute);
+                    NotificationManager::SendToWS("HydroFlow Tasks", basic_format("Task-ul de la ora {}, minutul {} a fost sters!", hour, minute));
                     found=true;
                     break;
                 }
@@ -207,7 +210,7 @@ namespace TaskManager {
             }
             if(TaskManager::tasks.size() == 0) 
             {
-                Serial.println("[TaskManager] Task size is 0.");
+                // Serial.println("[TaskManager] Task size is 0.");
                 return; 
             }
 
@@ -221,6 +224,7 @@ namespace TaskManager {
                     if(task.hour == date.tm_hour && task.minute == date.tm_min)
                     {
                         Electrovalve::ActivateElectrovalve();
+                        NotificationManager::SendToWS("HydroFlow Tasks", basic_format("Task-ul de la ora {}, minutul {} a pornit pentru {} minute.", task.hour, task.minute, TASK_DURATION));
                         lastMinuteEnabled = date.tm_min;
                         break;
                     }

@@ -24,11 +24,11 @@ AsyncWebSocket ws("/ws");
 void setup() {
   Serial.begin(115200);
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
-  // if (!LittleFS.begin(true)) {
-  //   Serial.println("LittleFS mount failed!");
-  //   return;
-  // }
-  // Serial.println("LittleFS mounted!");
+  if (!LittleFS.begin(true)) {
+    Serial.println("LittleFS mount failed!");
+    return;
+  }
+  Serial.println("LittleFS mounted!");
 
   #ifdef STA_MODE
     WiFi.mode(WIFI_STA);
@@ -82,3 +82,5 @@ void loop() {
   TaskManager::CheckForTasks();
   delay(10);
 } 
+
+// bug: restart la esp32 = nu e pe flash tasks urile

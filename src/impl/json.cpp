@@ -13,7 +13,7 @@ JsonDocument GetJsonDocument(const char* fileName) {
 
     if(error)
     {
-        Serial.printf("\n[SaveConfig]   Error deserializing JSON for file %s\n",  fileName);
+        Serial.printf("\n[SaveConfig]   Error deserializing JSON for file %s, %s\n",  fileName, error.c_str());
     }   
 
     file.close();

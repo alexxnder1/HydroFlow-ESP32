@@ -10,7 +10,7 @@ const char* ssid = "HydroFlow";
 const char* password = "test";
 
 AsyncWebServer server(80);
-AsyncWebSocket ws("/ws");
+AsyncWebSocket ws("ws://192.168.0.142:80");
 
 #include "./headers/task_manager.h"
 #include "./headers/electrovalve.h"
@@ -18,6 +18,8 @@ AsyncWebSocket ws("/ws");
 #include "./headers/json.h"
 #include "./headers/uptime.h"
 #include "./headers/web_socket.h"
+#include "./headers/screen.h"
+#include "./headers/utils.h"
 
 // this module is not published on github 
 #include "./privacy.h"
@@ -33,15 +35,17 @@ void setup() {
   }
   Serial.println("LittleFS mounted!");
 
+  Screen::Init();
+
   #ifdef STA_MODE
     WiFi.mode(WIFI_STA);
     WiFi.disconnect(true);
     WiFi.setAutoReconnect(true);
     WiFi.begin(NETWORK_HOST, NETWORK_PASSWORD);
-    Serial.printf("Connecting to WiFi....");
-    Serial.println(WiFi.getTxPower()); 
 
-    Serial.printf("\nConnecting to Hotspot");
+    Serial.printf("Connecting to WiFi....");
+    Screen::AddToQueue(basic_format("Connecting to {}.", NETWORK_HOST));
+
     while(WiFi.status() != WL_CONNECTED)
     { 
       delay(50);
@@ -49,6 +53,7 @@ void setup() {
     }
 
     Serial.printf("\nSTA IP Address: %s\n", WiFi.localIP().toString().c_str());
+    Screen::AddToQueue(basic_format("Connected!\nQuality: {}", getSignalQualityText(WiFi.RSSI())));
 
   #else
   
@@ -84,7 +89,6 @@ void setup() {
 
 void loop() {  
   TaskManager::CheckForTasks();
+  Screen::Loop();
   delay(10);
 } 
-
-// bug: restart la esp32 = nu e pe flash tasks urile

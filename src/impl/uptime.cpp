@@ -1,5 +1,6 @@
 #include "./headers/uptime.h"
 #include "./headers/timestamp.h"
+#include "./headers/screen.h"
 
 namespace UptimeManager {
     std::string uptime;
@@ -22,5 +23,6 @@ namespace UptimeManager {
     void SetRoutes()
     {
         server.on("/get_uptime", HTTP_GET, handleUptime);
+        Screen::SetDefaultText("Timestamp not set.");
     }
 }

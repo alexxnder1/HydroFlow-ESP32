@@ -12,7 +12,7 @@ namespace TaskManager {
         Electrovalve::ActivateElectrovalve();
         Serial.println("Handle force task");
         NotificationManager::SendToWS("HydroFlow Tasks", "Task pornit fortat!");
-
+        Screen::AddToQueue("[Task Fortat]\nSucces!");
         request->send(200, "text/plain", "OK");
     }
 
@@ -33,8 +33,9 @@ namespace TaskManager {
                     tasks.push_back({task["hour"], task["minute"]});
             }
         }
-       
-        Serial.printf("\n[LoadTasksFromMemory] Loaded %d tasks.\n", tasks.size());
+        
+        std::string str = basic_format("[Tasks Incarcate]\n{} tasks.", tasks.size());
+        Screen::AddToQueue(str);
     }
 
     void handleTasks(AsyncWebServerRequest* request)
@@ -48,16 +49,11 @@ namespace TaskManager {
             Task task = tasks[i];
             obj["hour"] = task.hour;
             obj["minute"] = task.minute;   
-            Serial.printf("\nTest %d",i);
         }
 
         String output;
         serializeJson(doc, output);
         request->send(200, "application/json", output);
-        // if(LittleFS.exists("/tasks.json"))
-        //     request->send(LittleFS, "/tasks.json", "application/json"); 
-
-        // else request->send(400, "application/json", "{\"error\":\"File not found\"}");
     }
     
     void handleAddTask(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) 
@@ -82,6 +78,7 @@ namespace TaskManager {
 
                 tasks.push_back({h, m});
                 SaveTasksToFlash();
+                Screen::AddToQueue(basic_format("[Task Salvat]\nOra {}, min {}.", h, m));
                 Serial.printf("\n[Add Task] Hour: %d, Minute: %d.", h, m);
                 NotificationManager::SendToWS("HydroFlow Tasks", basic_format("A fost adaugat un task la ora {}, minutul {}.", h, m));
             }
@@ -103,6 +100,7 @@ namespace TaskManager {
                 {
                     Electrovalve::DisableElectrovalve();
                     Serial.printf("\n[Stop Task] Hour: %d, Minute: %d", hour, minute);
+                    Screen::AddToQueue(basic_format("[Tasks]\nTask {}:{} oprit!", hour, minute));
                     found=true;
                     break;
                 }
@@ -127,6 +125,7 @@ namespace TaskManager {
         {
             int d = request->getParam("d")->value().toInt();
             TASK_DURATION = d;
+            Screen::AddToQueue(basic_format("[Durata Task]\nSetata la {} min.", d));
             NotificationManager::SendToWS("HydroFlow Tasks", basic_format("Durata task-ului a fost setat la {} minute.", d));
         }
 
@@ -151,6 +150,7 @@ namespace TaskManager {
                     SaveTasksToFlash();
 
                     Serial.printf("\n[Remove Task] Hour: %d, Minute: %d", hour, minute);
+                    Screen::AddToQueue(basic_format("[Tasks]\nTask {}:{} sters.", hour, minute));
                     NotificationManager::SendToWS("HydroFlow Tasks", basic_format("Task-ul de la ora {}, minutul {} a fost sters!", hour, minute));
                     found=true;
                     break;
@@ -201,7 +201,7 @@ namespace TaskManager {
     }
 
     void CheckForTasks() {
-        if (millis() - getDateCheckMillis > 1500) {
+        if (millis() - getDateCheckMillis > 5000) {
             getDateCheckMillis = millis();
             if(TimestampManager::startTimestamp == "") 
             {
@@ -213,6 +213,8 @@ namespace TaskManager {
                 // Serial.println("[TaskManager] Task size is 0.");
                 return; 
             }
+
+            Screen::UpdateDefaultText();
 
             tm date = GetDate();
 
@@ -236,7 +238,37 @@ namespace TaskManager {
             Electrovalve::DisableElectrovalve();
         }
     }
+    TaskManager::Task GetNextClosestTask() 
+    {
+        if (tasks.empty()) 
+            return {-1, -1}; 
 
+        tm date = GetDate(); 
+        int currentMinutesSinceMidnight = (date.tm_hour * 60) + date.tm_min;
+
+        TaskManager::Task closestTask = tasks[0];
+        int minDifference = 9999; 
+
+        for (const auto& task : tasks) 
+        {
+            int taskMinutesSinceMidnight = (task.hour * 60) + task.minute;
+            int difference = 0;
+
+            if (taskMinutesSinceMidnight >= currentMinutesSinceMidnight) 
+                difference = taskMinutesSinceMidnight - currentMinutesSinceMidnight;
+            else 
+                difference = (1440 - currentMinutesSinceMidnight) + taskMinutesSinceMidnight;
+
+            if (difference < minDifference) 
+            {
+                minDifference = difference;
+                closestTask = task;
+            }
+        }
+
+        return closestTask;
+    }
+    
     void SaveTasksToFlash() {
         WriteJsonDoc<Task>(
             "tasks",

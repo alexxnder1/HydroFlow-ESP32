@@ -7,6 +7,8 @@
 #include "LittleFS.h"
 #include "./headers/notification.h"
 #include "./headers/utils.h"
+#include "./headers/screen.h"
+#include "./headers/uptime.h"
 
 // #define TASK_DURATION 15*60*1000 
 // #define TASK_DURATION 10*1000
@@ -23,6 +25,7 @@ namespace TaskManager {
         Task(int h, int m) : hour(h), minute(m) {}
     };
     
+    TaskManager::Task GetNextClosestTask();
     void handleForceTask(AsyncWebServerRequest *request);
     void handleDeleteTask(AsyncWebServerRequest* request);
     void handleGetTaskDuration(AsyncWebServerRequest* request);

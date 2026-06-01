@@ -13,7 +13,7 @@
 <li>LCD Display</li>
 </ul>
 
-<h3><b>Hardware:</b></h3>
+<h3><b>🖥️ Hardware:</b></h3>
 <ul>
 <li>ESP32 DevKit V1 + External Antenna</li>
 <li>24VDC Relay Module</li>

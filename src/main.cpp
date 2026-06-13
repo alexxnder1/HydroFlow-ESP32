@@ -25,9 +25,10 @@ AsyncWebSocket ws("ws://192.168.0.142:80");
 #include "./privacy.h"
 
 #define STA_MODE
-
 void setup() {
+
   Serial.begin(115200);
+
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
   if (!LittleFS.begin(true)) {
     Serial.println("LittleFS mount failed!");
@@ -46,10 +47,15 @@ void setup() {
     Serial.printf("Connecting to WiFi....");
     Screen::AddToQueue(basic_format("Connecting to {}.", NETWORK_HOST));
 
-    while(WiFi.status() != WL_CONNECTED)
-    { 
-      delay(50);
-      Serial.print("."); 
+    int attempts = 0;
+    while(WiFi.status() != WL_CONNECTED && attempts < 40) { 
+      delay(500);
+      Serial.printf(". status: %d\n", WiFi.status());
+      attempts++;
+    }
+
+    if (WiFi.status() != WL_CONNECTED) {
+      Serial.println("WiFi failed to connect!");
     }
 
     Serial.printf("\nSTA IP Address: %s\n", WiFi.localIP().toString().c_str());

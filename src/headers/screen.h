@@ -1,8 +1,9 @@
 #pragma once
-#include <LiquidCrystal.h>
+#include "LiquidCrystal_I2C.h"
 #include <vector>
 #include <headers/utils.h>
 #include <headers/uptime.h>
+#include "Wire.h"
 #include "../headers/task_manager.h"
 
 #define TEXT_DURATION    5*1000

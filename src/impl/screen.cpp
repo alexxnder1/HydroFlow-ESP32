@@ -1,6 +1,6 @@
 #include "../headers/Screen.h"
 
-LiquidCrystal lcd(14, 13, 27, 23, 19, 21);
+LiquidCrystal_I2C lcd(0x27);
 
 namespace Screen {
     std::vector<std::string> queue;
@@ -10,7 +10,9 @@ namespace Screen {
 
     void Init() 
     {
+        Wire.begin(22, 21);  // SDA, SCL
         lcd.begin(16, 2);
+        lcd.backlight();
         Serial.println("[LCD] Initialized.");
     }
 

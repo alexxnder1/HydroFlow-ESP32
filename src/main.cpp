@@ -21,7 +21,7 @@ AsyncWebSocket ws("ws://192.168.0.142:80");
 #include "./headers/screen.h"
 #include "./headers/utils.h"
 
-// this module is not published on github 
+// this module is not published on github
 #include "./privacy.h"
 
 #define STA_MODE
@@ -48,7 +48,7 @@ void setup() {
     Screen::AddToQueue(basic_format("Connecting to {}.", NETWORK_HOST));
 
     int attempts = 0;
-    while(WiFi.status() != WL_CONNECTED && attempts < 40) { 
+    while(WiFi.status() != WL_CONNECTED && attempts < 40) {
       delay(500);
       Serial.printf(". status: %d\n", WiFi.status());
       attempts++;
@@ -62,8 +62,8 @@ void setup() {
     Screen::AddToQueue(basic_format("Connected!\nQuality: {}", getSignalQualityText(WiFi.RSSI())));
 
   #else
-  
-    WiFi.mode(WIFI_AP); 
+
+    WiFi.mode(WIFI_AP);
     bool ok = WiFi.softAP("HydroFlow", "test1234");
     Serial.println(WiFi.getTxPower());
     if (ok) {
@@ -80,7 +80,7 @@ void setup() {
 
   Electrovalve::SetGPIOToOutput();
   Electrovalve::DisableElectrovalve();
-  
+
   // Routes
   TimestampManager::SetRoutes();
   TaskManager::SetRoutes();
@@ -93,8 +93,8 @@ void setup() {
   WebSocket::Setup();
 }
 
-void loop() {  
+void loop() {
   TaskManager::CheckForTasks();
   Screen::Loop();
   delay(10);
-} 
+}

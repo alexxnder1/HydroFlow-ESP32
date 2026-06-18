@@ -8,9 +8,9 @@ namespace Screen {
     std:: string screenText;
     std::string defaultText;
 
-    void Init() 
+    void Init()
     {
-        Wire.begin(22, 21);  // SDA, SCL
+        Wire.begin(21, 22);  // SDA, SCL
         lcd.begin(16, 2);
         lcd.backlight();
         Serial.println("[LCD] Initialized.");
@@ -23,7 +23,7 @@ namespace Screen {
         int totalChars = str.length();
         size_t newlinePos = str.find('\n');
 
-        if (newlinePos != std::string::npos) 
+        if (newlinePos != std::string::npos)
         {
             std::string firstLine = str.substr(0, newlinePos);
             std::string secondLine = str.substr(newlinePos + 1);
@@ -39,16 +39,16 @@ namespace Screen {
                 lcd.print(secondLine.c_str());
             }
         }
-        else 
+        else
         {
             int rows = (totalChars == 0) ? 0 : (totalChars - 1) / 16;
-            if (rows > 1) rows = 1; 
+            if (rows > 1) rows = 1;
 
             for(int i = 0; i <= rows; i++)
             {
                 std::string lineSegment = str.substr(i * 16, 16);
                 lcd.setCursor(0, i);
-                lcd.print(lineSegment.c_str()); 
+                lcd.print(lineSegment.c_str());
             }
         }
 
@@ -85,7 +85,7 @@ namespace Screen {
             {
                 if(queue[0] != screenText)
                     Print(queue[0]);
-                
+
                 queue.erase(queue.begin());
             }
             else

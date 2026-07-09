@@ -30,3 +30,9 @@ void WriteJsonDoc(const char* fileName, const std::vector<T>& data, F toJson) {
     }
     file.close();
 }
+
+template <typename T, typename F>
+void WriteJsonDoc(const char* fileName, const T& data, F toJson) {
+    std::vector<T> temp = { data };
+    WriteJsonDoc<T>(fileName, temp, toJson);
+}

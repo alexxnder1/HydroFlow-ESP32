@@ -25,6 +25,11 @@ namespace TaskManager {
         Task(int h, int m) : hour(h), minute(m) {}
     };
     
+    class TaskSettings {
+        public: 
+        int duration;
+    };
+
     TaskManager::Task GetNextClosestTask();
     void handleForceTask(AsyncWebServerRequest *request);
     void handleDeleteTask(AsyncWebServerRequest* request);
@@ -34,9 +39,12 @@ namespace TaskManager {
 
     // Default Tasks
     extern std::vector<Task> tasks;
+    extern TaskSettings settings;
 
     tm GetDate();
     void CheckForTasks();
     void LoadTasksFromMemory();
+    void LoadTaskSettingsFromMemory();
+    void SaveTasksSettings();
     void SaveTasksToFlash();
 }

@@ -1,11 +1,12 @@
 #include "./headers/task_manager.h"
 
 namespace TaskManager {   
-    unsigned int TASK_DURATION = 15;
     unsigned long getDateCheckMillis = 0;
     int lastMinuteEnabled = -1;
+
     // TODO: load din Flash la tasks
     std::vector<Task> tasks;
+    TaskSettings settings = {15};
 
     void handleForceTask(AsyncWebServerRequest *request)
     {
@@ -37,7 +38,26 @@ namespace TaskManager {
         std::string str = basic_format("[Tasks Incarcate]\n{} tasks.", tasks.size());
         Screen::AddToQueue(str);
     }
+  void LoadTaskSettingsFromMemory()
+    {
+        JsonDocument doc = GetJsonDocument("task_settings");
+        JsonArray array = doc.as<JsonArray>();
 
+        if(!array.isNull())
+        {
+            for(JsonVariant t : array)
+            {
+                JsonObject task = t.as<JsonObject>();
+
+                if(!task.isNull())
+                    settings.duration = task["duration"] || 15;
+            }
+        }
+        
+        std::string str = basic_format("[Tasks Settings]\n{} duration.", settings.duration);
+        Screen::AddToQueue(str);
+    }
+    
     void handleTasks(AsyncWebServerRequest* request)
     {
         JsonDocument doc;
@@ -115,8 +135,8 @@ namespace TaskManager {
     
     void handleGetTaskDuration(AsyncWebServerRequest* request)
     {
-        Serial.printf("\n[Get Task Duration] Sent task duration %d.", TASK_DURATION);
-        request->send(200, "text/plain", std::to_string(TASK_DURATION).c_str());
+        Serial.printf("\n[Get Task Duration] Sent task duration %d.", settings.duration);
+        request->send(200, "text/plain", std::to_string(settings.duration).c_str());
     }
     
     void handleSetTaskDuration(AsyncWebServerRequest* request)
@@ -124,12 +144,15 @@ namespace TaskManager {
         if( request->hasParam("d"))
         {
             int d = request->getParam("d")->value().toInt();
-            TASK_DURATION = d;
+            
+            settings.duration = d;
+            SaveTasksSettings();
+
             Screen::AddToQueue(basic_format("[Durata Task]\nSetata la {} min.", d));
             NotificationManager::SendToWS("HydroFlow Tasks", basic_format("Durata task-ului a fost setat la {} minute.", d));
         }
 
-        Serial.printf("\n[Set Task Duration from Client] Sent task duration %d.", TASK_DURATION);
+        Serial.printf("\n[Set Task Duration from Client] Sent task duration %d.", settings.duration);
         request->send(200, "text/plain", "OK");
     }
 
@@ -226,7 +249,7 @@ namespace TaskManager {
                     if(task.hour == date.tm_hour && task.minute == date.tm_min)
                     {
                         Electrovalve::ActivateElectrovalve();
-                        NotificationManager::SendToWS("HydroFlow Tasks", basic_format("Task-ul de la ora {}, minutul {} a pornit pentru {} minute.", task.hour, task.minute, TASK_DURATION));
+                        NotificationManager::SendToWS("HydroFlow Tasks", basic_format("Task-ul de la ora {}, minutul {} a pornit pentru {} minute.", task.hour, task.minute, settings.duration));
                         lastMinuteEnabled = date.tm_min;
                         break;
                     }
@@ -234,7 +257,7 @@ namespace TaskManager {
             }
         }
 
-        if(Electrovalve::enable && millis() - Electrovalve::millisSinceStart > TASK_DURATION*60*1000) {
+        if(Electrovalve::enable && millis() - Electrovalve::millisSinceStart > settings.duration*60*1000) {
             Electrovalve::DisableElectrovalve();
         }
     }
@@ -281,5 +304,16 @@ namespace TaskManager {
         );
 
         Serial.printf("[TaskManager] Overwriting the default tasks to Flash.");
+    }
+
+    void SaveTasksSettings() {
+        WriteJsonDoc<TaskSettings>(
+            "task_settings",
+            settings,
+            [](const TaskSettings& t, JsonObject obj)
+            {
+                obj["duration"] = t.duration;
+            }
+        );
     }
 }

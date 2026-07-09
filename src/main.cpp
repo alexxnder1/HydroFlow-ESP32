@@ -32,7 +32,7 @@ void setup() {
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
   if (!LittleFS.begin(true)) {
     Serial.println("LittleFS mount failed!");
-    return;
+    return; 
   }
   Serial.println("LittleFS mounted!");
 
@@ -42,6 +42,17 @@ void setup() {
     WiFi.mode(WIFI_STA);
     WiFi.disconnect(true);
     WiFi.setAutoReconnect(true);
+    int n = WiFi.scanNetworks();
+
+    Serial.printf("%d networks found\n", n);
+
+    for (int i = 0; i < n; i++) {
+        Serial.printf("%d: %s (%d dBm)\n",
+                      i,
+                      WiFi.SSID(i).c_str(),
+                      WiFi.RSSI(i));
+    }
+    
     WiFi.begin(NETWORK_HOST, NETWORK_PASSWORD);
 
     Serial.printf("Connecting to WiFi....");
@@ -77,6 +88,7 @@ void setup() {
   #endif
 
   TaskManager::LoadTasksFromMemory();
+  TaskManager::LoadTaskSettingsFromMemory();
 
   Electrovalve::SetGPIOToOutput();
   Electrovalve::DisableElectrovalve();
